@@ -25,30 +25,6 @@ const PLAYLIST = [
     artist: "M.S. Subbulakshmi",
     art: getThumbnail("ATflA6WOy0I")
   },
-  {
-    id: "IYur26JAAqo",
-    title: "Hanuman Chalisa",
-    artist: "M.S. Subbulakshmi",
-    art: getThumbnail("IYur26JAAqo")
-  },
-  {
-    id: "Q_kNJc1Dw9U",
-    title: "Sri Kanakadhara Stotram",
-    artist: "M.S. Subbulakshmi",
-    art: getThumbnail("Q_kNJc1Dw9U")
-  },
-  {
-    id: "0qadh4UMBw0",
-    title: "Top 5 Morning Stotram",
-    artist: "M.S. Subbulakshmi",
-    art: getThumbnail("0qadh4UMBw0")
-  },
-  {
-    id: "1DClJmWtIWc",
-    title: "Devi Stotram – Navratri Special",
-    artist: "M.S. Subbulakshmi",
-    art: getThumbnail("1DClJmWtIWc")
-  }
 ];
 
 export default function App() {
