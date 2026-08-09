@@ -20,18 +20,6 @@ const PLAYLIST = [
     art: getThumbnail("R-bwYbOExt8")
   },
   {
-    id: "g7B1PZ1Gg6s",
-    title: "Kurai Ondrum Illai",
-    artist: "M.S. Subbulakshmi",
-    art: getThumbnail("g7B1PZ1Gg6s")
-  },
-  {
-    id: "t_3F3Q22hE0",
-    title: "Bhavayami Gopalabalam",
-    artist: "M.S. Subbulakshmi",
-    art: getThumbnail("t_3F3Q22hE0")
-  },
-  {
     id: "ATflA6WOy0I",
     title: "Vishnu Sahasranamam",
     artist: "M.S. Subbulakshmi",
@@ -238,8 +226,8 @@ export default function App() {
         </h1>
       </div>
 
-      {/* Player Bar — 5% up from bottom */}
-      <div className="absolute w-full flex flex-col items-center px-4" style={{ bottom: '13%' }}>
+      {/* Player Bar */}
+      <div className="absolute w-full flex flex-col items-center px-4" style={{ bottom: '11%' }}>
         <div className="w-full max-w-2xl bg-black/40 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex items-center gap-4 sm:gap-6 shadow-2xl">
 
           {/* Album Art */}
