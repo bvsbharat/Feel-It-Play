@@ -4,6 +4,12 @@ import { Play, Pause, SkipBack, SkipForward, ExternalLink, ListMusic, X, Music2 
 // @ts-ignore
 import bgImage from './assets/images/south_indian_temple_flat_1786238519827.jpg';
 
+const YouTubeIcon = () => (
+  <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
+
 const getThumbnail = (id: string) => `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
 
 const PLAYLIST = [
@@ -26,34 +32,34 @@ const PLAYLIST = [
     art: getThumbnail("t_3F3Q22hE0")
   },
   {
-    id: "5iXR2sBWkFU",
+    id: "ATflA6WOy0I",
     title: "Vishnu Sahasranamam",
     artist: "M.S. Subbulakshmi",
-    art: getThumbnail("5iXR2sBWkFU")
+    art: getThumbnail("ATflA6WOy0I")
   },
   {
-    id: "K2Fqx3_T01A",
-    title: "Mahadeva Shambho",
-    artist: "M.S. Subbulakshmi",
-    art: getThumbnail("K2Fqx3_T01A")
-  },
-  {
-    id: "xoJmNpJiSMw",
+    id: "IYur26JAAqo",
     title: "Hanuman Chalisa",
     artist: "M.S. Subbulakshmi",
-    art: getThumbnail("xoJmNpJiSMw")
+    art: getThumbnail("IYur26JAAqo")
   },
   {
-    id: "AJ3Lm2n-BTs",
-    title: "Gayatri Mantra",
+    id: "Q_kNJc1Dw9U",
+    title: "Sri Kanakadhara Stotram",
     artist: "M.S. Subbulakshmi",
-    art: getThumbnail("AJ3Lm2n-BTs")
+    art: getThumbnail("Q_kNJc1Dw9U")
   },
   {
-    id: "7IpStscnxjc",
-    title: "Devi Stotram – Mahishasura Mardini",
+    id: "0qadh4UMBw0",
+    title: "Top 5 Morning Stotram",
     artist: "M.S. Subbulakshmi",
-    art: getThumbnail("7IpStscnxjc")
+    art: getThumbnail("0qadh4UMBw0")
+  },
+  {
+    id: "1DClJmWtIWc",
+    title: "Devi Stotram – Navratri Special",
+    artist: "M.S. Subbulakshmi",
+    art: getThumbnail("1DClJmWtIWc")
   }
 ];
 
@@ -165,8 +171,8 @@ export default function App() {
       className="min-h-screen relative flex items-center justify-center font-sans overflow-hidden bg-zinc-900"
       style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
-      {/* Hidden YouTube Player — key forces full remount on track change */}
-      <div className="hidden">
+      {/* YouTube iframe — off-screen so audio keeps playing (display:none kills audio) */}
+      <div className="absolute -left-[9999px] -top-[9999px] w-1 h-1 overflow-hidden pointer-events-none" aria-hidden="true">
         <YouTube
           key={currentTrack.id}
           videoId={currentTrack.id}
@@ -191,16 +197,16 @@ export default function App() {
             href={`https://music.youtube.com/watch?v=${currentTrack.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 hover:text-white transition-colors"
           >
-            <span className="w-4 h-4 bg-red-600 text-white rounded-full flex items-center justify-center text-[10px]">▶</span>
+            <YouTubeIcon />
             YT Music <ExternalLink size={12} className="ml-0.5" />
           </a>
         </div>
       </div>
 
-      {/* Title */}
-      <div className="absolute top-24 md:top-32 w-full text-center z-10 drop-shadow-2xl px-4">
+      {/* Title — positioned at ~40% from top (shifted down ~20% from before) */}
+      <div className="absolute w-full text-center z-10 drop-shadow-2xl px-4" style={{ top: '40%', transform: 'translateY(-50%)' }}>
         <h1
           className="text-6xl md:text-8xl lg:text-9xl font-bold text-white tracking-wider font-serif"
           style={{ textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}
@@ -210,7 +216,7 @@ export default function App() {
       </div>
 
       {/* Bottom Container */}
-      <div className="absolute bottom-8 md:bottom-10 w-full flex flex-col items-center gap-6 px-4">
+      <div className="absolute bottom-8 md:bottom-10 w-full flex flex-col items-center px-4">
         {/* Player Bar */}
         <div className="w-full max-w-2xl bg-black/40 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex items-center gap-4 sm:gap-6 shadow-2xl">
 
@@ -268,10 +274,6 @@ export default function App() {
             </button>
           </div>
         </div>
-
-        <p className="text-white/60 text-sm md:text-base font-light tracking-[0.3em] uppercase drop-shadow-md">
-          Morning Chants
-        </p>
       </div>
 
       {/* Playlist Modal */}
