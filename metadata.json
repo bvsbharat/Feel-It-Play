@@ -1,0 +1,6 @@
+{
+  "name": "Suprabhatam Player",
+  "description": "A clean, minimalist music player for South Indian morning Suprabhatam tracks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
