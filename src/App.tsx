@@ -1,30 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import YouTube from 'react-youtube';
-import { Play, Pause, SkipBack, SkipForward, ExternalLink } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, ExternalLink, ListMusic, X } from 'lucide-react';
 // @ts-ignore - Image might not be typed
-import bgImage from './assets/images/south_indian_morning_1786237202263.jpg';
+import bgImage from './assets/images/south_indian_temple_flat_1786238519827.jpg';
 
 // Fallback image for album art
 const ALBUM_ART = "https://images.unsplash.com/photo-1601662528567-526cd06f3647?q=80&w=400&auto=format&fit=crop";
+const getThumbnail = (id: string) => `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
 
 const PLAYLIST = [
   {
     id: "R-bwYbOExt8", // Venkateswara Suprabhatam track ID
     title: "Sri Venkateswara Suprabhatam",
     artist: "M.S. Subbulakshmi",
-    art: ALBUM_ART
+    art: getThumbnail("R-bwYbOExt8")
   },
   {
     id: "g7B1PZ1Gg6s", 
     title: "Kurai Ondrum Illai",
     artist: "M.S. Subbulakshmi",
-    art: ALBUM_ART
+    art: getThumbnail("g7B1PZ1Gg6s")
   },
   {
     id: "t_3F3Q22hE0",
     title: "Bhavayami Gopalabalam",
     artist: "M.S. Subbulakshmi",
-    art: ALBUM_ART
+    art: getThumbnail("t_3F3Q22hE0")
   }
 ];
 
@@ -35,6 +36,7 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [player, setPlayer] = useState<any>(null);
+  const [showPlaylist, setShowPlaylist] = useState(false);
 
   const currentTrack = PLAYLIST[currentTrackIndex];
 
@@ -150,17 +152,19 @@ export default function App() {
       </div>
 
       {/* Top Navigation Bar */}
-      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start text-white/90 text-sm font-medium">
+      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start text-white/90 text-sm font-medium z-20">
         <div className="flex items-center gap-2">
           <span>{currentTimeStr || '6:00 am'}</span>
         </div>
 
-        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md px-3 py-1 rounded-full">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span>108 online</span>
-        </div>
-
         <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
+          <button 
+            onClick={() => setShowPlaylist(true)}
+            className="flex items-center gap-1 hover:text-white transition-colors"
+          >
+            <ListMusic size={16} />
+            <span>Playlist</span>
+          </button>
           <a href="#" className="flex items-center gap-1 hover:text-white transition-colors">
             <span className="w-4 h-4 bg-white text-zinc-900 rounded-full flex items-center justify-center text-[10px]">S</span>
             Spotify <ExternalLink size={12} className="ml-0.5" />
@@ -177,30 +181,29 @@ export default function App() {
         </div>
       </div>
 
-      {/* Center Typography */}
-      <div className="text-center z-10 drop-shadow-2xl">
-        <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold text-white tracking-wider mb-2 font-serif" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.5)'}}>
+      {/* Top Typography */}
+      <div className="absolute top-24 md:top-32 w-full text-center z-10 drop-shadow-2xl px-4">
+        <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold text-white tracking-wider font-serif" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.5)'}}>
           सुप्रभातम्
         </h1>
-        <p className="text-white/80 text-xl md:text-2xl font-light tracking-[0.2em] uppercase mt-4">
-          Morning Chants
-        </p>
       </div>
 
-      {/* Player Bar */}
-      <div className="absolute bottom-8 md:bottom-12 w-[90%] max-w-2xl bg-black/30 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex items-center gap-4 sm:gap-6 shadow-2xl">
-        
-        {/* Album Art with spinning animation when playing */}
-        <div className="relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden shadow-lg border border-white/20">
-          <img 
-            src={currentTrack.art} 
-            alt="Album Art" 
-            className={`w-full h-full object-cover ${isPlaying ? 'animate-[spin_8s_linear_infinite]' : ''}`} 
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-4 h-4 bg-zinc-900 rounded-full border border-white/30"></div>
+      {/* Bottom Container */}
+      <div className="absolute bottom-8 md:bottom-10 w-full flex flex-col items-center gap-6 px-4">
+        {/* Player Bar */}
+        <div className="w-full max-w-2xl bg-black/40 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex items-center gap-4 sm:gap-6 shadow-2xl">
+          
+          {/* Album Art with spinning animation when playing */}
+          <div className="relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden shadow-lg border border-white/20">
+            <img 
+              src={currentTrack.art} 
+              alt="Album Art" 
+              className={`w-full h-full object-cover scale-110 ${isPlaying ? 'animate-[spin_8s_linear_infinite]' : ''}`} 
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-4 h-4 bg-zinc-900 rounded-full border border-white/30"></div>
+            </div>
           </div>
-        </div>
 
         {/* Track Info & Progress */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -258,6 +261,50 @@ export default function App() {
           >
             <SkipForward size={20} fill="currentColor" />
           </button>
+        </div>
+      </div>
+      
+      <p className="text-white/60 text-sm md:text-base font-light tracking-[0.3em] uppercase drop-shadow-md">
+        Morning Chants
+      </p>
+    </div>
+
+      {/* Playlist Modal */}
+      <div className={`absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${showPlaylist ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className="relative w-full max-w-4xl max-h-[80vh] overflow-hidden rounded-2xl bg-zinc-900 border border-white/10 shadow-2xl flex flex-col">
+          <div className="p-4 border-b border-white/10 flex justify-between items-center bg-zinc-800">
+            <h2 className="text-white font-semibold">Morning Playlists</h2>
+            <button 
+              onClick={() => setShowPlaylist(false)}
+              className="text-white/60 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <div className="p-4 overflow-y-auto flex-1">
+            {/* Isolate SociableKit Widget in an iframe to catch script errors */}
+            <iframe 
+              title="YouTube Playlist"
+              srcDoc={`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <style>
+                    body { margin: 0; padding: 0; background: transparent; font-family: sans-serif; color: white; }
+                    /* Force dark mode for widget if possible, though SociableKit usually handles it */
+                  </style>
+                </head>
+                <body>
+                  <div class="sk-ww-youtube-playlist-videos" data-embed-id="25703856"></div>
+                  <script src="https://widgets.sociablekit.com/youtube-playlist-videos/widget.js" defer></script>
+                </body>
+                </html>
+              `}
+              className="w-full h-full min-h-[500px]"
+              frameBorder="0"
+              sandbox="allow-scripts allow-popups allow-same-origin"
+            />
+          </div>
         </div>
       </div>
     </div>
