@@ -69,14 +69,19 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [player, setPlayer] = useState<any>(null);
   const [showPlaylist, setShowPlaylist] = useState(false);
 
-  // Carry autoplay intent across track switches via a ref
-  const shouldAutoplayRef = useRef(false);
+  // Use refs so callbacks always see fresh values without stale closures
+  const playerRef = useRef<any>(null);
+  const currentTrackIndexRef = useRef(0);
+
+  useEffect(() => {
+    currentTrackIndexRef.current = currentTrackIndex;
+  }, [currentTrackIndex]);
 
   const currentTrack = PLAYLIST[currentTrackIndex];
 
+  // Clock
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -89,68 +94,87 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
+  // Progress ticker
   useEffect(() => {
-    if (!player || !isPlaying) return;
-    const interval = setInterval(async () => {
+    if (!isPlaying) return;
+    const interval = setInterval(() => {
       try {
-        const currentTime = await player.getCurrentTime();
-        setProgress(currentTime);
+        const t = playerRef.current?.getCurrentTime();
+        if (typeof t === 'number') setProgress(t);
       } catch (_) {}
     }, 1000);
     return () => clearInterval(interval);
-  }, [player, isPlaying]);
+  }, [isPlaying]);
 
   const onReady = (event: any) => {
-    setPlayer(event.target);
-    setDuration(event.target.getDuration());
-    setProgress(0);
-    if (shouldAutoplayRef.current) {
-      event.target.playVideo();
-    }
+    playerRef.current = event.target;
   };
 
   const onStateChange = (event: any) => {
     if (event.data === 1) {
+      // playing
       setIsPlaying(true);
       setDuration(event.target.getDuration());
-    } else if (event.data === 2 || event.data === -1) {
+    } else if (event.data === 2) {
+      // paused by user — only this state sets isPlaying false
       setIsPlaying(false);
+    } else if (event.data === 0) {
+      // ended — auto-advance
+      const nextIndex = (currentTrackIndexRef.current + 1) % PLAYLIST.length;
+      setCurrentTrackIndex(nextIndex);
+      setProgress(0);
+      setDuration(0);
+      playerRef.current?.loadVideoById(PLAYLIST[nextIndex].id);
     }
-    // ENDED → advance to next track
-    if (event.data === 0) {
-      shouldAutoplayRef.current = true;
-      setCurrentTrackIndex(prev => (prev + 1) % PLAYLIST.length);
-    }
+    // states -1 (unstarted) and 3 (buffering) intentionally ignored
+    // so the spinning UI stays consistent while a new track loads
   };
 
   const handlePlayPause = () => {
-    if (!player) return;
+    if (!playerRef.current) return;
     if (isPlaying) {
-      shouldAutoplayRef.current = false;
-      player.pauseVideo();
+      playerRef.current.pauseVideo();
     } else {
-      shouldAutoplayRef.current = true;
-      player.playVideo();
+      playerRef.current.playVideo();
     }
   };
 
   const handleNext = () => {
-    shouldAutoplayRef.current = isPlaying;
-    setIsPlaying(false);
-    setCurrentTrackIndex(prev => (prev + 1) % PLAYLIST.length);
+    const nextIndex = (currentTrackIndex + 1) % PLAYLIST.length;
+    setCurrentTrackIndex(nextIndex);
+    setProgress(0);
+    setDuration(0);
+    if (playerRef.current) {
+      // loadVideoById plays immediately; cueVideoById loads without playing
+      if (isPlaying) {
+        playerRef.current.loadVideoById(PLAYLIST[nextIndex].id);
+      } else {
+        playerRef.current.cueVideoById(PLAYLIST[nextIndex].id);
+      }
+    }
   };
 
   const handlePrev = () => {
-    shouldAutoplayRef.current = isPlaying;
-    setIsPlaying(false);
-    setCurrentTrackIndex(prev => (prev - 1 + PLAYLIST.length) % PLAYLIST.length);
+    const prevIndex = (currentTrackIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
+    setCurrentTrackIndex(prevIndex);
+    setProgress(0);
+    setDuration(0);
+    if (playerRef.current) {
+      if (isPlaying) {
+        playerRef.current.loadVideoById(PLAYLIST[prevIndex].id);
+      } else {
+        playerRef.current.cueVideoById(PLAYLIST[prevIndex].id);
+      }
+    }
   };
 
   const handleSelectTrack = (index: number) => {
-    shouldAutoplayRef.current = true;
-    setIsPlaying(false);
     setCurrentTrackIndex(index);
+    setProgress(0);
+    setDuration(0);
     setShowPlaylist(false);
+    // Always starts playing when user taps a track in the playlist
+    playerRef.current?.loadVideoById(PLAYLIST[index].id);
   };
 
   const formatTime = (seconds: number) => {
@@ -163,7 +187,7 @@ export default function App() {
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
     setProgress(newTime);
-    if (player) player.seekTo(newTime, true);
+    playerRef.current?.seekTo(newTime, true);
   };
 
   return (
@@ -171,11 +195,10 @@ export default function App() {
       className="min-h-screen relative flex items-center justify-center font-sans overflow-hidden bg-zinc-900"
       style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
-      {/* YouTube iframe — off-screen so audio keeps playing (display:none kills audio) */}
+      {/* Single persistent YouTube iframe — never remounts, we switch via loadVideoById */}
       <div className="absolute -left-[9999px] -top-[9999px] w-1 h-1 overflow-hidden pointer-events-none" aria-hidden="true">
         <YouTube
-          key={currentTrack.id}
-          videoId={currentTrack.id}
+          videoId={PLAYLIST[0].id}
           onReady={onReady}
           onStateChange={onStateChange}
           opts={{ playerVars: { autoplay: 0, controls: 0, disablekb: 1 } }}
@@ -205,7 +228,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Title — positioned at ~40% from top (shifted down ~20% from before) */}
+      {/* Title — ~40% from top */}
       <div className="absolute w-full text-center z-10 drop-shadow-2xl px-4" style={{ top: '40%', transform: 'translateY(-50%)' }}>
         <h1
           className="text-6xl md:text-8xl lg:text-9xl font-bold text-white tracking-wider font-serif"
@@ -215,9 +238,8 @@ export default function App() {
         </h1>
       </div>
 
-      {/* Bottom Container */}
-      <div className="absolute bottom-8 md:bottom-10 w-full flex flex-col items-center px-4">
-        {/* Player Bar */}
+      {/* Player Bar — 5% up from bottom */}
+      <div className="absolute w-full flex flex-col items-center px-4" style={{ bottom: '13%' }}>
         <div className="w-full max-w-2xl bg-black/40 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex items-center gap-4 sm:gap-6 shadow-2xl">
 
           {/* Album Art */}
@@ -238,7 +260,7 @@ export default function App() {
             <p className="text-white/60 text-sm truncate">{currentTrack.artist}</p>
             <div className="mt-3 flex items-center gap-3">
               <span className="text-white/50 text-xs w-8 text-right tabular-nums">{formatTime(progress)}</span>
-              <div className="flex-1 relative group flex items-center h-4 cursor-pointer">
+              <div className="flex-1 relative flex items-center h-4 cursor-pointer">
                 <input
                   type="range"
                   min="0"
@@ -267,7 +289,9 @@ export default function App() {
               onClick={handlePlayPause}
               className="w-12 h-12 flex items-center justify-center bg-white text-zinc-900 rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg"
             >
-              {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+              {isPlaying
+                ? <Pause size={24} fill="currentColor" />
+                : <Play size={24} fill="currentColor" className="ml-1" />}
             </button>
             <button onClick={handleNext} className="text-white/70 hover:text-white transition-colors p-2">
               <SkipForward size={20} fill="currentColor" />
@@ -292,7 +316,6 @@ export default function App() {
               <X size={24} />
             </button>
           </div>
-
           <div className="overflow-y-auto flex-1 p-2">
             {PLAYLIST.map((track, index) => (
               <button
