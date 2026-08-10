@@ -193,7 +193,7 @@ export default function App() {
       </div>
 
       {/* Title — ~40% from top */}
-      <div className="absolute w-full text-center z-10 drop-shadow-2xl px-4" style={{ top: '40%', transform: 'translateY(-50%)' }}>
+      <div className="absolute w-full text-center z-10 drop-shadow-2xl px-4" style={{ top: '35%', transform: 'translateY(-50%)' }}>
         <h1
           className="text-6xl md:text-8xl lg:text-9xl font-bold text-white tracking-wider font-serif"
           style={{ textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}
@@ -203,7 +203,7 @@ export default function App() {
       </div>
 
       {/* Player Bar */}
-      <div className="absolute w-full flex flex-col items-center px-4" style={{ bottom: '11%' }}>
+      <div className="absolute w-full flex flex-col items-center px-4" style={{ bottom: '8%' }}>
         <div className="w-full max-w-2xl bg-black/40 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex items-center gap-4 sm:gap-6 shadow-2xl">
 
           {/* Album Art */}
